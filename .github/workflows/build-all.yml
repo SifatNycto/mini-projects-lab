@@ -13,6 +13,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
@@ -20,21 +21,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Linux
+
+      # Install compiler on Linux
       - name: Install GCC (Linux)
         if: runner.os == 'Linux'
         run: sudo apt update && sudo apt install -y gcc g++
 
-      # macOS
+
+      # Install compiler on macOS
       - name: Install GCC (macOS)
         if: runner.os == 'macOS'
         run: brew install gcc || true
 
-      # Build
+
+      # Install compiler on Windows
+      - name: Install MinGW (Windows)
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: mingw-w64-x86_64-gcc
+
+
+      # Build Programs
       - name: Build Programs
         shell: bash
         run: |
           mkdir -p build
+
+          echo "Building projects..."
 
           g++ rock-paper-scissors/main.cpp -o build/rps || echo "rps failed"
           g++ number-guessing-game/main.cpp -o build/guess || echo "guess failed"
@@ -43,10 +58,11 @@ jobs:
           gcc banking-system/c-version/main.c -o build/bank_c || echo "bank_c failed"
           g++ banking-system/cpp-version/main.cpp -o build/bank_cpp || echo "bank_cpp failed"
 
-          echo "Build result:"
+          echo "Build output:"
           ls build
 
-      # Zip all outputs
+
+      # Create ZIP
       - name: Create ZIP
         shell: bash
         run: |
@@ -54,12 +70,14 @@ jobs:
           zip -r programs-${{ runner.os }}.zip .
           mv *.zip ..
 
-      # Upload ZIP
-      - name: Upload Artifact
+
+      # Upload Artifact
+      - name: Upload ZIP
         uses: actions/upload-artifact@v4
         with:
           name: programs-${{ runner.os }}
           path: programs-${{ runner.os }}.zip
+
 
 
   release:
@@ -67,12 +85,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download artifacts
+      - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
           path: release-files
 
-      - name: Create Release
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
