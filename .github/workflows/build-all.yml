@@ -1,0 +1,80 @@
+name: Build All Mini Projects
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+
+      # Get your source code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+
+      # Install compiler (Linux / Mac)
+      - name: Install compilers
+        if: runner.os != 'Windows'
+        run: |
+          sudo apt-get update || true
+          sudo apt-get install -y gcc g++ || true
+          brew install gcc || true
+
+
+      # ========== BANKING SYSTEM (C) ==========
+      - name: Build Banking (C)
+        run: |
+          cd banking-system/c-version
+          gcc main.c -o banking_c || gcc main.c -o banking_c.exe
+          cd ../..
+
+
+      # ========== BANKING SYSTEM (C++) ==========
+      - name: Build Banking (C++)
+        run: |
+          cd banking-system/cpp-version
+          g++ main.cpp -o banking_cpp || g++ main.cpp -o banking_cpp.exe
+          cd ../..
+
+
+      # ========== ROCK PAPER SCISSORS ==========
+      - name: Build RPS
+        run: |
+          cd rock-paper-scissors
+          g++ main.cpp -o rps || g++ main.cpp -o rps.exe
+          cd ..
+
+
+      # ========== NUMBER GUESSING ==========
+      - name: Build Guessing Game
+        run: |
+          cd number-guessing-game
+          g++ main.cpp -o guess || g++ main.cpp -o guess.exe
+          cd ..
+
+
+      # ========== CGPA CALCULATOR ==========
+      - name: Build CGPA
+        run: |
+          cd cgpa-calculator
+          g++ main.cpp -o cgpa || g++ main.cpp -o cgpa.exe
+          cd ..
+
+
+      # Upload all outputs
+      - name: Upload programs
+        uses: actions/upload-artifact@v3
+        with:
+          name: programs-${{ runner.os }}
+          path: |
+            banking-system/
+            rock-paper-scissors/
+            number-guessing-game/
+            cgpa-calculator/
