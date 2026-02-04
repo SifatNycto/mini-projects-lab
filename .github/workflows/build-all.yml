@@ -32,8 +32,9 @@ jobs:
 
       # Build programs
       - name: Build programs
+        shell: bash
         run: |
-          mkdir build
+          mkdir -p build
 
           g++ rock-paper-scissors/main.cpp -o build/rps || true
           g++ number-guessing-game/main.cpp -o build/guess || true
@@ -59,7 +60,9 @@ jobs:
         with:
           path: release-files
 
-      - name: Create Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: release-files/**/*
