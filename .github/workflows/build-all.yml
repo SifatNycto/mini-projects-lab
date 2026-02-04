@@ -13,62 +13,62 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     strategy:
-      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
-      - name: Checkout
+      # Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
 
-      # Install compiler on Linux
-      - name: Install GCC (Linux)
+      # Linux tools
+      - name: Install GCC + Zip (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt update && sudo apt install -y gcc g++
+        run: sudo apt update && sudo apt install -y gcc g++ zip
 
 
-      # Install compiler on macOS
-      - name: Install GCC (macOS)
+      # macOS tools
+      - name: Install GCC + Zip (macOS)
         if: runner.os == 'macOS'
-        run: brew install gcc || true
+        run: brew install gcc zip || true
 
 
-      # Install compiler on Windows
+      # Windows tools
       - name: Install MinGW (Windows)
         if: runner.os == 'Windows'
-        uses: msys2/setup-msys2@v2
-        with:
-          update: true
-          install: mingw-w64-x86_64-gcc
+        run: choco install mingw -y
 
 
-      # Build Programs
+      # Build programs
       - name: Build Programs
         shell: bash
         run: |
           mkdir -p build
 
-          echo "Building projects..."
+          g++ rock-paper-scissors/main.cpp -o build/rps
+          g++ number-guessing-game/main.cpp -o build/guess
+          g++ cgpa-calculator/main.cpp -o build/cgpa
 
-          g++ rock-paper-scissors/main.cpp -o build/rps || echo "rps failed"
-          g++ number-guessing-game/main.cpp -o build/guess || echo "guess failed"
-          g++ cgpa-calculator/main.cpp -o build/cgpa || echo "cgpa failed"
+          gcc banking-system/c-version/main.c -o build/bank_c
+          g++ banking-system/cpp-version/main.cpp -o build/bank_cpp
 
-          gcc banking-system/c-version/main.c -o build/bank_c || echo "bank_c failed"
-          g++ banking-system/cpp-version/main.cpp -o build/bank_cpp || echo "bank_cpp failed"
-
-          echo "Build output:"
+          echo "Build completed:"
           ls build
 
 
-      # Create ZIP
+      # Create ZIP (Cross Platform)
       - name: Create ZIP
         shell: bash
         run: |
-          cd build
-          zip -r programs-${{ runner.os }}.zip .
-          mv *.zip ..
+          mkdir -p dist
+
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            powershell Compress-Archive build\* dist\programs-Windows.zip
+          else
+            cd build
+            zip -r ../dist/programs-${RUNNER_OS}.zip .
+          fi
 
 
       # Upload Artifact
@@ -76,8 +76,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: programs-${{ runner.os }}
-          path: programs-${{ runner.os }}.zip
-
+          path: dist/*.zip
 
 
   release:
@@ -85,13 +84,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Download all artifacts
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
           path: release-files
 
 
-      - name: Create GitHub Release
+      # Create GitHub Release
+      - name: Create Release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
