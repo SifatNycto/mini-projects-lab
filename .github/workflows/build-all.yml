@@ -8,39 +8,52 @@ on:
 permissions:
   contents: write
 
+
 jobs:
   build:
+    name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
+
     steps:
-      # Checkout
-      - name: Checkout Repository
+      # -------------------------------
+      # Checkout Repository
+      # -------------------------------
+      - name: Checkout
         uses: actions/checkout@v4
 
 
-      # Linux tools
-      - name: Install GCC + Zip (Linux)
+      # -------------------------------
+      # Install Tools (Linux)
+      # -------------------------------
+      - name: Install Tools (Linux)
         if: runner.os == 'Linux'
         run: sudo apt update && sudo apt install -y gcc g++ zip
 
 
-      # macOS tools
-      - name: Install GCC + Zip (macOS)
+      # -------------------------------
+      # Install Tools (macOS)
+      # -------------------------------
+      - name: Install Tools (macOS)
         if: runner.os == 'macOS'
         run: brew install gcc zip || true
 
 
-      # Windows tools
-      - name: Install MinGW (Windows)
+      # -------------------------------
+      # Install Tools (Windows)
+      # -------------------------------
+      - name: Install Tools (Windows)
         if: runner.os == 'Windows'
         run: choco install mingw -y
 
 
-      # Build programs
+      # -------------------------------
+      # Build All Programs
+      # -------------------------------
       - name: Build Programs
         shell: bash
         run: |
@@ -53,25 +66,37 @@ jobs:
           gcc banking-system/c-version/main.c -o build/bank_c
           g++ banking-system/cpp-version/main.cpp -o build/bank_cpp
 
-          echo "Build completed:"
+          echo "Build files:"
           ls build
 
 
-      # Create ZIP (Cross Platform)
-      - name: Create ZIP
+      # -------------------------------
+      # ZIP (Linux + macOS)
+      # -------------------------------
+      - name: Create ZIP (Linux & macOS)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           mkdir -p dist
-
-          if [ "$RUNNER_OS" = "Windows" ]; then
-            powershell Compress-Archive build\* dist\programs-Windows.zip
-          else
-            cd build
-            zip -r ../dist/programs-${RUNNER_OS}.zip .
-          fi
+          cd build
+          zip -r ../dist/programs-${RUNNER_OS}.zip .
 
 
-      # Upload Artifact
+      # -------------------------------
+      # ZIP (Windows)
+      # -------------------------------
+      - name: Create ZIP (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist
+          Compress-Archive -Path build\* -DestinationPath dist\programs-Windows.zip -Force
+          Get-ChildItem dist
+
+
+      # -------------------------------
+      # Upload Artifacts
+      # -------------------------------
       - name: Upload ZIP
         uses: actions/upload-artifact@v4
         with:
@@ -79,20 +104,30 @@ jobs:
           path: dist/*.zip
 
 
+
+  # =====================================
+  # RELEASE JOB
+  # =====================================
   release:
+    name: Create GitHub Release
     needs: build
     runs-on: ubuntu-latest
 
+
     steps:
-      # Download all artifacts
+      # -------------------------------
+      # Download Artifacts
+      # -------------------------------
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
           path: release-files
 
 
-      # Create GitHub Release
-      - name: Create Release
+      # -------------------------------
+      # Publish Release
+      # -------------------------------
+      - name: Publish Release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
