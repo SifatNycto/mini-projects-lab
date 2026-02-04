@@ -1,9 +1,12 @@
 name: Build and Release Mini Projects
 
+permissions:
+  contents: write
+
 on:
   push:
     tags:
-      - "v*.*.*"   # Runs only when you push version tags
+      - "v*.*.*"
 
 jobs:
   build:
@@ -39,7 +42,7 @@ jobs:
           gcc banking-system/c-version/main.c -o build/bank_c || true
           g++ banking-system/cpp-version/main.cpp -o build/bank_cpp || true
 
-      # Upload files
+      # Upload artifacts
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -56,7 +59,7 @@ jobs:
         with:
           path: release-files
 
-      - name: Create Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: release-files/**/*
