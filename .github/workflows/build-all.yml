@@ -1,80 +1,62 @@
-name: Build All Mini Projects
+name: Build and Release Mini Projects
 
 on:
   push:
-    branches: [ main ]
+    tags:
+      - "v*.*.*"   # Runs only when you push version tags
 
 jobs:
   build:
+    runs-on: ${{ matrix.os }}
+
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
-    runs-on: ${{ matrix.os }}
-
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      # Get your source code
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      # Linux
+      - name: Install GCC (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt update && sudo apt install -y gcc g++
 
+      # macOS
+      - name: Install GCC (macOS)
+        if: runner.os == 'macOS'
+        run: brew install gcc || true
 
-      # Install compiler (Linux / Mac)
-      - name: Install compilers
-        if: runner.os != 'Windows'
+      # Build all programs
+      - name: Build programs
         run: |
-          sudo apt-get update || true
-          sudo apt-get install -y gcc g++ || true
-          brew install gcc || true
+          mkdir build
 
+          g++ rock-paper-scissors/main.cpp -o build/rps || true
+          g++ number-guessing-game/main.cpp -o build/guess || true
+          g++ cgpa-calculator/main.cpp -o build/cgpa || true
 
-      # ========== BANKING SYSTEM (C) ==========
-      - name: Build Banking (C)
-        run: |
-          cd banking-system/c-version
-          gcc main.c -o banking_c || gcc main.c -o banking_c.exe
-          cd ../..
+          gcc banking-system/c-version/main.c -o build/bank_c || true
+          g++ banking-system/cpp-version/main.cpp -o build/bank_cpp || true
 
-
-      # ========== BANKING SYSTEM (C++) ==========
-      - name: Build Banking (C++)
-        run: |
-          cd banking-system/cpp-version
-          g++ main.cpp -o banking_cpp || g++ main.cpp -o banking_cpp.exe
-          cd ../..
-
-
-      # ========== ROCK PAPER SCISSORS ==========
-      - name: Build RPS
-        run: |
-          cd rock-paper-scissors
-          g++ main.cpp -o rps || g++ main.cpp -o rps.exe
-          cd ..
-
-
-      # ========== NUMBER GUESSING ==========
-      - name: Build Guessing Game
-        run: |
-          cd number-guessing-game
-          g++ main.cpp -o guess || g++ main.cpp -o guess.exe
-          cd ..
-
-
-      # ========== CGPA CALCULATOR ==========
-      - name: Build CGPA
-        run: |
-          cd cgpa-calculator
-          g++ main.cpp -o cgpa || g++ main.cpp -o cgpa.exe
-          cd ..
-
-
-      # Upload all outputs
-      - name: Upload programs
+      # Upload files
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: programs-${{ runner.os }}
-          path: |
-            banking-system/
-            rock-paper-scissors/
-            number-guessing-game/
-            cgpa-calculator/
+          path: build/
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-files
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release-files/**/*
