@@ -1,92 +1,104 @@
 # 💻 Mini Projects Lab
 
-A collection of C and C++ mini projects for practice, learning, and skill development.  
-This repository contains small academic and logical programming projects created to improve problem-solving skills.
+A collection of **C and C++ mini projects** created for learning, practice, and skill development.  
+Each project focuses on improving **problem-solving, logic building, and programming fundamentals**.
+
+Detailed documentation is available inside each project folder.
 
 ---
 
-## 📌 Projects Included
+## 📌 Projects
 
-### 🏦 Banking System
-A console-based banking application implemented in both C and C++.
+- 🏦 **Banking System (C & C++)**  
+  📁 `banking-system/`
 
-- C Version: File-based multi-user system
-- C++ Version: Menu-driven balance management
+- ✊✋✌ **Rock Paper Scissors Game**  
+  📁 `rock-paper-scissors/`
 
-📁 Folder: `banking-system/`
+- 🔢 **Number Guessing Game**  
+  📁 `number-guessing-game/`
 
----
-
-### ✊✋✌ Rock Paper Scissors Game
-A simple interactive game where the player competes against the computer.
-
-- Random computer choices
-- Win/Lose/Tie detection
-
-📁 Folder: `rock-paper-scissors/`
+- 🎓 **CGPA Calculator**  
+  📁 `cgpa-calculator/`
 
 ---
 
-### 🔢 Number Guessing Game
-A fun game where the player guesses a randomly generated number.
+## 📂 Repository Structure
 
-- Hint system (Too High / Too Low)
-- Attempt counter
-
-📁 Folder: `number-guessing-game/`
-
----
-
-### 🎓 CGPA Calculator
-A CGPA calculation tool for students based on grades and credits.
-
-- Weighted average calculation
-- Multiple subject support
-
-📁 Folder: `cgpa-calculator/`
-
----
-
-## 🛠 Technologies Used
-
-- C / C++ Programming
-- Standard Libraries
-- File Handling
-- Command-Line Interface (CLI)
-- Git & GitHub
-
----
-
-## 🎯 Learning Objectives
-
-This repository focuses on:
-
-- Strengthening programming fundamentals
-- Practicing logical problem solving
-- Writing clean and readable code
-- Maintaining organized repositories
-- Improving documentation skills
+```text
+mini-projects-lab/
+│
+├── banking-system/
+│   ├── c-version/
+│   │   ├── main.c
+│   │   └── README.md
+│   ├── cpp-version/
+│   │   ├── main.cpp
+│   │   └── README.md
+│   └── README.md
+│
+├── rock-paper-scissors/
+│   ├── main.cpp
+│   └── README.md
+│
+├── number-guessing-game/
+│   ├── main.cpp
+│   └── README.md
+│
+├── cgpa-calculator/
+│   ├── main.cpp
+│   └── README.md
+│
+├── .github/
+│   └── workflows/
+│       └── build-all.yml
+│
+├── LICENSE
+└── README.md
+```
 
 ---
 
-## 🚀 Future Plans
+### 🛠 Technologies
 
-More mini projects will be added, including:
+ - C / C++
+ - Standard Libraries
+ - File Handling
+ - Command-Line Interface (CLI)
+ - Git & GitHub
+ - GitHub Actions (CI/CD)
 
-- Data structure implementations
-- Algorithm practice programs
-- Utility tools
-- Small system simulations
+---
+
+## 🎯 Learning Goals
+
+This repository is maintained to:
+
+ - Strengthen core programming skills
+ - Improve logical thinking
+ - Practice clean coding
+ - Learn version control
+ - Build a strong project portfolio
+
+---
+
+## 🚀 Future Work
+
+More projects will be added, including:
+
+ - Data Structures
+ - Algorithm practice
+ - Utility programs
+ - System simulations
 
 ---
 
 ## 👨‍💻 Author
 
-Mehedi Hasan Sifat  
-Computer Science Student
+Mehedi Hasan Sifat
 
 ---
 
 ## 📄 License
 
-This repository is licensed under the MIT License.
+Licensed under the MIT License.
